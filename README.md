@@ -1,2 +1,2 @@
 # TravelPlanner
-Smart travel planning system
+Smart travel planning system. Never Lost.
