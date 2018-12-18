@@ -1,6 +1,7 @@
 package com.laioffer.travelplanner
 
 import android.content.pm.PackageManager
+import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -19,6 +20,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var lastLocation: Location
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -47,15 +49,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-        // Add a marker in Sydney and move the camera
-        val myPlace = LatLng(40.73, -73.99)  // this is New York
-        map.addMarker(MarkerOptions().position(myPlace).title("My Favorite City"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(myPlace, 12.0f))
-
-        map.getUiSettings().setZoomControlsEnabled(true)
+        map.uiSettings.isZoomControlsEnabled = true
         map.setOnMarkerClickListener(this)
+
         setUpMap()
     }
+
 
     override fun onMarkerClick(p0: Marker?) = false
 
@@ -66,6 +65,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                     arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             return
         }
+
+        map.isMyLocationEnabled = true
+
+        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
+            // Got last known location. In some rare situations this can be null.
+            if (location != null) {
+                lastLocation = location
+                val currentLatLng = LatLng(location.latitude, location.longitude)
+                placeMarkerOnMap(currentLatLng)
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+            }
+        }
     }
+
+    private fun placeMarkerOnMap(location: LatLng) {
+        // 1
+        val markerOptions = MarkerOptions().position(location)
+        // 2
+        map.addMarker(markerOptions)
+    }
+
 
 }
