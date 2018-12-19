@@ -1,10 +1,13 @@
 package com.laioffer.travelplanner
 
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
+import android.util.Log
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -15,6 +18,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import java.io.IOException
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
@@ -80,10 +84,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     private fun placeMarkerOnMap(location: LatLng) {
-        // 1
         val markerOptions = MarkerOptions().position(location)
-        // 2
+
+        val titleStr = getAddress(location)  // add these two lines
+        markerOptions.title(titleStr)
+
         map.addMarker(markerOptions)
+    }
+
+
+    private fun getAddress(latLng: LatLng): String {
+        // 1
+        val geocoder = Geocoder(this)
+        val addresses: List<Address>?
+        val address: Address?
+        var addressText = ""
+
+        try {
+            // 2
+            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+            // 3
+            if (null != addresses && !addresses.isEmpty()) {
+                address = addresses[0]
+                // Fetch the address lines using getAddressLine,
+                // join them, and send them to the thread.
+                val addressFragments = with(address) {
+                    (0..maxAddressLineIndex).map { getAddressLine(it) }
+                }
+                addressText = addressFragments.joinToString(separator = "\n")
+            }
+        } catch (e: IOException) {
+            Log.e("MapsActivity", e.localizedMessage)
+        }
+
+        return addressText
     }
 
 
