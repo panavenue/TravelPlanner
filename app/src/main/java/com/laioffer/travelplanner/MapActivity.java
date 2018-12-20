@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,6 +46,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
     private PlaceInfo mPlace;
+    private Marker mMarker;
 
     private static final String TAG = "PlaceAutocompleteAd";
     private static final float DEFAULT_ZOOM = 15f;
@@ -54,12 +56,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     //widget
     private AutoCompleteTextView mSearchText;
+    private ImageView mInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
+        mInfo = (ImageView) findViewById(R.id.place_info);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -120,6 +124,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
         });
 
+        mInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: clicked place info");
+                try{
+                    if(mMarker.isInfoWindowShown()){
+                        mMarker.hideInfoWindow();
+                    }else{
+                        Log.d(TAG, "onClick: place info: " + mPlace.toString());
+                        mMarker.showInfoWindow();
+                    }
+                }catch (NullPointerException e){
+                    Log.e(TAG, "onClick: NullPointerException: " + e.getMessage() );
+                }
+            }
+        });
+
         hideSoftKeyboard();
     }
 
@@ -151,6 +172,37 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         MarkerOptions options = new MarkerOptions().position(latLng).title(title);
         mMap.addMarker(options);
+
+        hideSoftKeyboard();
+    }
+
+    private void moveCamera(LatLng latLng, float zoom, PlaceInfo placeInfo) {
+        Log.d(TAG, "moveCamera: moving the camera to: lat: " + latLng.latitude + ", lng: " + latLng.longitude );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+
+        mMap.clear();
+
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapActivity.this));
+
+        if(placeInfo != null){
+            try{
+                String snippet = "Address: " + placeInfo.getAddress() + "\n" +
+                        "Phone Number: " + placeInfo.getPhoneNumber() + "\n" +
+                        "Website: " + placeInfo.getWebsiteUri() + "\n" +
+                        "Price Rating: " + placeInfo.getRating() + "\n";
+
+                MarkerOptions options = new MarkerOptions()
+                        .position(latLng)
+                        .title(placeInfo.getName())
+                        .snippet(snippet);
+                mMarker = mMap.addMarker(options);
+
+            }catch (NullPointerException e){
+                Log.e(TAG, "moveCamera: NullPointerException: " + e.getMessage() );
+            }
+        }else{
+            mMap.addMarker(new MarkerOptions().position(latLng));
+        }
 
         hideSoftKeyboard();
     }
@@ -223,7 +275,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             }
 
             moveCamera(new LatLng(place.getViewport().getCenter().latitude,
-                    place.getViewport().getCenter().longitude), DEFAULT_ZOOM, mPlace.getName());
+                    place.getViewport().getCenter().longitude), DEFAULT_ZOOM, mPlace);
 
             places.release();
         }
