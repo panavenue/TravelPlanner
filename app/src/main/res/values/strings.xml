@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">TravelPlanner</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_map">Map</string>
+    <string name="google_maps_API_key">AIzaSyD-qkmojsCbUX5W1f-jnIphjS4L_fAVxa4</string>
 </resources>
