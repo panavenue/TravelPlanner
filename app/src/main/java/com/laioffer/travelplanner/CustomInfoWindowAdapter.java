@@ -1,8 +1,10 @@
 package com.laioffer.travelplanner;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -17,6 +19,12 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     public CustomInfoWindowAdapter(Context context) {
         mContext = context;
         mWindow = LayoutInflater.from(context).inflate(R.layout.custom_info_window, null);
+        mWindow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("test test ", " onclikc");
+            }
+        });
     }
 
     private void rendowWindowText(Marker marker, View view){
@@ -34,6 +42,9 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         if(!snippet.equals("")){
             tvSnippet.setText(snippet);
         }
+
+        Button tvButton = (Button) view.findViewById(R.id.add_button);
+        tvButton.bringToFront();
     }
 
     @Override
@@ -46,5 +57,11 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     public View getInfoContents(Marker marker) {
         rendowWindowText(marker, mWindow);
         return mWindow;
+    }
+
+    /** Called when the user touches the button */
+    public void addPlace(View view) {
+        // Do something in response to button click
+
     }
 }
