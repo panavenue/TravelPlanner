@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,13 +41,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
     private PlaceInfo mPlace;
     private Marker mMarker;
+    private Button addButton;
 
     private static final String TAG = "PlaceAutocompleteAd";
     private static final float DEFAULT_ZOOM = 15f;
@@ -90,6 +93,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sanfran, 12f));
 
         init();
+
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(this);
     }
 
     private void init() {
@@ -196,6 +202,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         .title(placeInfo.getName())
                         .snippet(snippet);
                 mMarker = mMap.addMarker(options);
+                mMarker.setTag(placeInfo);
 
             }catch (NullPointerException e){
                 Log.e(TAG, "moveCamera: NullPointerException: " + e.getMessage() );
@@ -280,4 +287,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             places.release();
         }
     };
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.d("Info Window: ", " OnInfoWindowClicked");
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        PlaceInfo myobject = (PlaceInfo) marker.getTag();
+        return false;
+    }
 }
