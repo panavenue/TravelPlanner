@@ -15,7 +15,7 @@ public class PlaceInfo {
     @SerializedName("geometry")
     private Geometry geometry;
 
-    @SerializedName("formatted_address")
+    @SerializedName("vicinity")
     private String address;
 
     private float rating;

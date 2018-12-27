@@ -36,7 +36,6 @@ public class RetrofitClient {
     private static OkHttpClient getHttpClient() {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .addInterceptor(new PlacesInterceptor())
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS);
@@ -51,7 +50,7 @@ public class RetrofitClient {
             Request original = chain.request();
             Request request = original
                     .newBuilder()
-                    .header("X-Api-Key", API)
+                    .header("key", API)
                     .build();
 
             return chain.proceed(request);

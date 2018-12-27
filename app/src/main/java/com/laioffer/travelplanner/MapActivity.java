@@ -128,8 +128,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     || event.getAction() == event.ACTION_DOWN
                     || event.getAction() == event.KEYCODE_ENTER) {
 
-                    //execute method for searching
-                    geoLocate();
+                    mMap.clear();
+
+                    //execute method for searching single place
+                    //geoLocate();
+
+                    //method for searching multiple nearby places
+                    String searchString = mSearchText.getText().toString();
+                    getPlaces(initalLocation.getLocationString(), 20000, searchString);
                 }
                 return false;
             }
@@ -155,6 +161,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         hideSoftKeyboard();
     }
 
+    //search for single Place
     private void geoLocate() {
         Log.d(TAG, "geoLocate: geoLocateing");
 
@@ -332,9 +339,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
             LatLng latLng = new LatLng(lat, lng);
             String snippet = "Address: " + place.getAddress() + "\n" +
-                    "Phone Number: " + place.getPhoneNumber() + "\n" +
-                    "Website: " + place.getWebsiteUri() + "\n" +
-                    "Price Rating: " + place.getRating() + "\n";
+                    "Rating: " + place.getRating() + "\n";
 
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
