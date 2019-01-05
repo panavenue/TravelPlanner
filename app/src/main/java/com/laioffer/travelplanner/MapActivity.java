@@ -71,7 +71,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         mSearchText = (AutoCompleteTextView) findViewById(R.id.input_search);
-        mInfo = (ImageView) findViewById(R.id.place_info);
+        mInfo = (ImageView) findViewById(R.id.addPlace);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -135,7 +135,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                     //method for searching multiple nearby places
                     String searchString = mSearchText.getText().toString();
-                    getPlaces(initalLocation.getLocationString(), 20000, searchString);
+                    getPlaces(initalLocation.getLocationString(), 10000, searchString);
+                    mSearchText.dismissDropDown();
+                    hideSoftKeyboard();
                 }
                 return false;
             }
