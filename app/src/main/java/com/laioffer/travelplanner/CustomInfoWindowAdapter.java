@@ -19,12 +19,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
     public CustomInfoWindowAdapter(Context context) {
         mContext = context;
         mWindow = LayoutInflater.from(context).inflate(R.layout.custom_info_window, null);
-        mWindow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("test test ", " onclikc");
-            }
-        });
     }
 
     private void rendowWindowText(Marker marker, View view){
@@ -43,8 +37,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             tvSnippet.setText(snippet);
         }
 
-        Button tvButton = (Button) view.findViewById(R.id.add_button);
-        tvButton.bringToFront();
     }
 
     @Override
@@ -59,9 +51,4 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         return mWindow;
     }
 
-    /** Called when the user touches the button */
-    public void addPlace(View view) {
-        // Do something in response to button click
-
-    }
 }

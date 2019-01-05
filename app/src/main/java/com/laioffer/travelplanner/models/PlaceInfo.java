@@ -3,16 +3,31 @@ package com.laioffer.travelplanner.models;
 import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.annotations.SerializedName;
 
 public class PlaceInfo {
 
-    private String name;
-    private String address;
-    private String phoneNumber;
     private String id;
-    private Uri websiteUri;
-    private LatLng latlng;
+    private String place_id;
+
+    private String name;
+
+    @SerializedName("geometry")
+    private Geometry geometry;
+
+    @SerializedName("vicinity")
+    private String address;
+
     private float rating;
+    private String phoneNumber;
+
+    @SerializedName("website")
+    private Uri websiteUri;
+
+    @SerializedName("opening_hours")
+    private OpeningHours openingHours;
+
+    private LatLng latlng;
     private String attributions;
 
     public PlaceInfo(String name, String address, String phoneNumber, String id, Uri websiteUri,
@@ -28,7 +43,6 @@ public class PlaceInfo {
     }
 
     public PlaceInfo() {
-
     }
 
     public String getName() {
@@ -107,5 +121,29 @@ public class PlaceInfo {
                 ", rating=" + rating +
                 ", attributions='" + attributions + '\'' +
                 '}';
+    }
+
+    public String getPlace_id() {
+        return place_id;
+    }
+
+    public OpeningHours getOpeningHours() {
+        return openingHours;
+    }
+
+    public void setOpeningHours(OpeningHours openingHours) {
+        this.openingHours = openingHours;
+    }
+
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+
+    public void setPlace_id(String place_id) {
+        this.place_id = place_id;
     }
 }

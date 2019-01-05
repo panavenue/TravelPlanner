@@ -9,12 +9,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,25 +33,34 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.laioffer.travelplanner.models.Location;
 import com.laioffer.travelplanner.models.PlaceInfo;
+import com.laioffer.travelplanner.retrofit.PlacesRequestApi;
+import com.laioffer.travelplanner.retrofit.RetrofitClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener {
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
     private GoogleApiClient mGoogleApiClient;
     private PlaceInfo mPlace;
     private Marker mMarker;
+    private Button addButton;
 
     private static final String TAG = "PlaceAutocompleteAd";
     private static final float DEFAULT_ZOOM = 15f;
     private static final LatLngBounds LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168), new LatLng(71, 136)
     );
+    private static final Location initalLocation = new Location(37.7740417, -122.4396093);
 
     //widget
     private AutoCompleteTextView mSearchText;
@@ -85,11 +93,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sanfran = new LatLng(37.7740417, -122.4396093);
+        LatLng sanfran = new LatLng(initalLocation.getLat(), initalLocation.getLng());
         mMap.addMarker(new MarkerOptions().position(sanfran).title("San Francisco"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sanfran, 12f));
 
         init();
+
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerClickListener(this);
     }
 
     private void init() {
@@ -117,8 +128,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     || event.getAction() == event.ACTION_DOWN
                     || event.getAction() == event.KEYCODE_ENTER) {
 
-                    //execute method for searching
-                    geoLocate();
+                    mMap.clear();
+
+                    //execute method for searching single place
+                    //geoLocate();
+
+                    //method for searching multiple nearby places
+                    String searchString = mSearchText.getText().toString();
+                    getPlaces(initalLocation.getLocationString(), 20000, searchString);
                 }
                 return false;
             }
@@ -144,6 +161,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         hideSoftKeyboard();
     }
 
+    //search for single Place
     private void geoLocate() {
         Log.d(TAG, "geoLocate: geoLocateing");
 
@@ -196,6 +214,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         .title(placeInfo.getName())
                         .snippet(snippet);
                 mMarker = mMap.addMarker(options);
+                mMarker.setTag(placeInfo);
 
             }catch (NullPointerException e){
                 Log.e(TAG, "moveCamera: NullPointerException: " + e.getMessage() );
@@ -280,4 +299,57 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             places.release();
         }
     };
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.d("Info Window: ", " OnInfoWindowClicked");
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        PlaceInfo myobject = (PlaceInfo) marker.getTag();
+        return false;
+    }
+
+    private void getPlaces(String startLocation, int radius, String searchName) {
+        RetrofitClient.getInstance().create(PlacesRequestApi.class)
+                .getNearbyPlaces(startLocation, radius, searchName)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(baseResponse -> baseResponse != null)
+                .subscribe(baseResponse -> {
+                    showPlaces(baseResponse.results);
+                });
+    }
+
+    private void showPlaces(List<PlaceInfo> places) {
+        for (PlaceInfo place : places) {
+            Double lat = place.getGeometry().getLocation().getLat();
+            Double lng = place.getGeometry().getLocation().getLng();
+//            String placeName = place.getName();
+//
+//            MarkerOptions markerOptions = new MarkerOptions();
+//            LatLng latLng = new LatLng(lat, lng);
+//            // Position of Marker on Map
+//            markerOptions.position(latLng);
+//            // Adding Title to the Marker
+//            //markerOptions.title(placeName + " : " + vicinity);
+//            // Adding Marker to the Camera.
+//            Marker m = mMap.addMarker(markerOptions);
+
+            LatLng latLng = new LatLng(lat, lng);
+            String snippet = "Address: " + place.getAddress() + "\n" +
+                    "Rating: " + place.getRating() + "\n";
+
+            MarkerOptions options = new MarkerOptions()
+                    .position(latLng)
+                    .title(place.getName())
+                    .snippet(snippet);
+            Marker m = mMap.addMarker(options);
+            //mMarker.setTag(placeInfo);
+
+//            TinNewsCard tinNewsCard = new TinNewsCard(news, mSwipeView, this);
+//            mSwipeView.addView(tinNewsCard);
+        }
+    }
 }
