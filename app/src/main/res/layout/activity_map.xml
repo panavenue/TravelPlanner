@@ -36,6 +36,8 @@
             android:layout_height="match_parent"
             android:layout_toRightOf="@+id/ic_magnify"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="3dp"
+            android:inputType="text"
             android:textSize="15sp"
             android:textColor="#000"
             android:id="@+id/input_search"
@@ -52,7 +54,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="15dp"
         android:scaleType="centerCrop"
-        android:id="@+id/place_info"
-        android:src="@drawable/ic_info"/>
+        android:id="@+id/addPlace"
+        android:src="@drawable/ic_add"/>
 
 </RelativeLayout>
